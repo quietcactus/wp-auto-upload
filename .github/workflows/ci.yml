@@ -1,8 +1,10 @@
 name: CI
 
 on:
+  # Pull request branches are covered by the pull_request event; matching them
+  # here as well would run every job twice.
   push:
-    branches: ['**']
+    branches: [master]
   pull_request:
   workflow_dispatch:
 

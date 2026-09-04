@@ -2,7 +2,7 @@
 Contributors: quietcactus
 Tags: images, media, import, external images, migration
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 4.0.0
 License: GPLv2 or later
@@ -22,7 +22,7 @@ the post to your own copy.
 
 = What it does =
 
-* Finds external images in `src` and `srcset`, including `<source>` elements inside `<picture>`
+* Finds external images in `src`, and in `srcset` and `<source>` where WordPress keeps that markup (see the FAQ)
 * Downloads them into the normal WordPress uploads folder and media library
 * Rewrites the post content to point at your copy
 * Optionally scales images down to a maximum width and height
@@ -112,6 +112,15 @@ true from the `external_image_importer_allow_unsafe_urls` filter.
 
 No. Images already hosted on your own domain, on the configured base URL, or
 imported by a previous save are left alone.
+
+= Why was only the src imported and not the srcset images? =
+
+WordPress, not this plugin, is removing them. Core's `wp_kses` allow-list for
+post content permits `src` on an `img` but not `srcset`, and does not permit
+`<picture>` or `<source>` at all, so that markup is stripped from the content
+before any plugin sees it, for every author without the `unfiltered_html`
+capability. Administrators on a single site do have that capability, so
+srcset candidates written by an administrator are imported normally.
 
 = Why is %post_id% empty in a file name? =
 

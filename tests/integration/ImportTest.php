@@ -74,6 +74,20 @@ final class ImportTest extends WP_UnitTestCase
     }
 
     /**
+     * The distinct URLs fetched during a test, in a stable order.
+     *
+     * @return array<int, string>
+     */
+    private function sortedRequests(): array
+    {
+        $urls = array_values(array_unique($this->requested));
+
+        sort($urls);
+
+        return $urls;
+    }
+
+    /**
      * @param array<string, mixed> $args Extra post arguments.
      */
     private function createPost(string $content, array $args = []): \WP_Post
@@ -136,12 +150,36 @@ final class ImportTest extends WP_UnitTestCase
 
     public function testSrcsetCandidatesAreImported(): void
     {
+        // $allowedposttags['img'] carries no "srcset", so wp_filter_post_kses
+        // removes the attribute before wp_insert_post_data runs for any author
+        // without unfiltered_html. Drop those filters so this exercises the
+        // plugin rather than kses.
+        kses_remove_filters();
+
         $post = $this->createPost(
             '<img src="https://remote.test/large.png" srcset="https://remote.test/small.png 300w, https://remote.test/large.png 800w" alt="responsive">'
         );
 
         $this->assertStringNotContainsString('remote.test', $post->post_content);
-        $this->assertCount(2, array_unique($this->requested));
+        $this->assertSame(
+            ['https://remote.test/large.png', 'https://remote.test/small.png'],
+            $this->sortedRequests()
+        );
+    }
+
+    /**
+     * Pins the interaction with core: with kses active only the src attribute
+     * survives, so only that image can be imported. This is WordPress removing
+     * the markup, not the plugin ignoring it.
+     */
+    public function testWordPressItselfStripsSrcsetForRestrictedAuthors(): void
+    {
+        $post = $this->createPost(
+            '<img src="https://remote.test/large.png" srcset="https://remote.test/small.png 300w" alt="responsive">'
+        );
+
+        $this->assertStringNotContainsString('srcset', $post->post_content);
+        $this->assertSame(['https://remote.test/large.png'], $this->sortedRequests());
     }
 
     public function testLocalImagesAreLeftAlone(): void

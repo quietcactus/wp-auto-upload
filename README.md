@@ -18,7 +18,8 @@ When a post is saved, the plugin scans the content for `<img>` and `<source>`
 tags pointing at other domains, downloads those images into the uploads folder,
 registers them in the media library, and rewrites the URLs in the post.
 
-* Reads `src` and `srcset`, including `<source>` inside `<picture>`
+* Reads `src`, plus `srcset` and `<source>` where WordPress keeps them (core's `wp_kses`
+  allow-list drops `srcset`, `<picture>` and `<source>` for authors without `unfiltered_html`)
 * Optional maximum width/height, applied on import
 * Filenames and alt text built from placeholder patterns
 * Per-domain and per-post-type exclusions
