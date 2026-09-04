@@ -1,0 +1,228 @@
+# Copyright (C) 2026 quietcactus
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: External Image Importer 4.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/external-image-importer\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-04T17:36:59+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: external-image-importer\n"
+
+#. Plugin Name of the plugin
+#: external-image-importer.php:3
+#: src/Admin/SettingsPage.php:46
+#: src/views/settings-page.php:46
+msgid "External Image Importer"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: external-image-importer.php:4
+msgid "https://github.com/quietcactus/wp-auto-upload"
+msgstr ""
+
+#. Description of the plugin
+#: external-image-importer.php:5
+msgid "Finds externally hosted images in your post content, imports them into the media library and rewrites the URLs to point at your own site."
+msgstr ""
+
+#. Author of the plugin
+#: external-image-importer.php:9
+msgid "quietcactus"
+msgstr ""
+
+#. Author URI of the plugin
+#: external-image-importer.php:10
+msgid "https://github.com/quietcactus"
+msgstr ""
+
+#. translators: 1: required PHP version, 2: current PHP version
+#: external-image-importer.php:53
+#, php-format
+msgid "External Image Importer requires PHP %1$s or newer. This site runs PHP %2$s, so the plugin has been disabled."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:45
+msgid "External Image Importer Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:71
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:89
+msgid "You do not have permission to change these settings."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:124
+msgid "You do not have permission to view these settings."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:134
+msgid "Settings saved."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:135
+msgid "Settings have been reset to their defaults."
+msgstr ""
+
+#: src/ImageImporter.php:70
+msgid "The URL is not an absolute http(s) URL."
+msgstr ""
+
+#: src/ImageImporter.php:74
+msgid "The image is already hosted on this site."
+msgstr ""
+
+#: src/ImageImporter.php:78
+msgid "The host of this image is excluded in the plugin settings."
+msgstr ""
+
+#: src/ImageImporter.php:98
+msgid "The downloaded file is not a supported image type."
+msgstr ""
+
+#: src/ImageImporter.php:110
+msgid "The image could not be written to the uploads directory."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: src/ImageImporter.php:283
+#, php-format
+msgid "The remote server answered with HTTP %d."
+msgstr ""
+
+#: src/ImageImporter.php:292
+msgid "The remote server returned an empty response."
+msgstr ""
+
+#. translators: %d: maximum size in megabytes
+#: src/ImageImporter.php:300
+#, php-format
+msgid "The image is larger than the %d MB limit."
+msgstr ""
+
+#: src/ImageImporter.php:480
+msgid "The attachment could not be created."
+msgstr ""
+
+#: src/views/settings-page.php:64
+msgid "Base URL"
+msgstr ""
+
+#. translators: %s: list of example URLs
+#: src/views/settings-page.php:73
+#, php-format
+msgid "Serve imported images from this address instead of your site URL, for example a CDN. Examples: %s"
+msgstr ""
+
+#: src/views/settings-page.php:83
+msgid "Image file name"
+msgstr ""
+
+#. translators: %s: list of available placeholders
+#: src/views/settings-page.php:92
+#, php-format
+msgid "File name given to imported images. Available placeholders: %s"
+msgstr ""
+
+#: src/views/settings-page.php:102
+msgid "Alt text"
+msgstr ""
+
+#. translators: %s: list of available placeholders
+#: src/views/settings-page.php:111
+#, php-format
+msgid "Alt attribute written back into the post. Available placeholders: %s"
+msgstr ""
+
+#: src/views/settings-page.php:121
+msgid "Maximum image size"
+msgstr ""
+
+#: src/views/settings-page.php:123
+msgid "(unavailable)"
+msgstr ""
+
+#: src/views/settings-page.php:127
+msgid "Max width"
+msgstr ""
+
+#: src/views/settings-page.php:132
+msgid "Max height"
+msgstr ""
+
+#: src/views/settings-page.php:138
+msgid "Imported images larger than this are scaled down, keeping their aspect ratio. Leave both at 0 to keep the original size."
+msgstr ""
+
+#: src/views/settings-page.php:142
+msgid "Resizing needs the GD or Imagick PHP extension, which is not enabled on this server."
+msgstr ""
+
+#: src/views/settings-page.php:149
+msgid "Maximum download size"
+msgstr ""
+
+#: src/views/settings-page.php:154
+msgid "MB"
+msgstr ""
+
+#: src/views/settings-page.php:156
+msgid "Remote files larger than this are skipped. This protects the server from very large or hostile downloads."
+msgstr ""
+
+#: src/views/settings-page.php:162
+msgid "Exclude post types"
+msgstr ""
+
+#: src/views/settings-page.php:166
+msgid "Post types excluded from importing"
+msgstr ""
+
+#: src/views/settings-page.php:181
+msgid "Content of the selected post types is left untouched."
+msgstr ""
+
+#: src/views/settings-page.php:188
+msgid "Exclude domains"
+msgstr ""
+
+#: src/views/settings-page.php:194
+msgid "One domain per line. Images hosted on these domains are never imported."
+msgstr ""
+
+#: src/views/settings-page.php:204
+msgid "Reset to defaults"
+msgstr ""
+
+#: src/views/settings-page.php:209
+msgid "Reset all settings to their defaults?"
+msgstr ""
+
+#: src/views/settings-page.php:220
+msgid "About this plugin"
+msgstr ""
+
+#: src/views/settings-page.php:223
+msgid "When a post is saved, images hosted on other sites are downloaded into your media library and the URLs in the post are rewritten to point at your own copy."
+msgstr ""
+
+#: src/views/settings-page.php:228
+msgid "Source code on GitHub"
+msgstr ""
+
+#: src/views/settings-page.php:233
+msgid "Report a bug"
+msgstr ""
+
+#. translators: %s: name of the original plugin author
+#: src/views/settings-page.php:242
+#, php-format
+msgid "Forked from the Auto Upload Images plugin by %s and released under the same GPL licence."
+msgstr ""

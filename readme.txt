@@ -1,192 +1,171 @@
-=== Auto Upload Images ===
-Contributors: airani
-Donate link: https://irani.im/wp-auto-upload-images.html#donate
-Tags: upload, auto, automatically, image, images, admin, administrator, post, save, media, automation, editor, filter
-Requires at least: 2.7
-Tested up to: 6.1.1
-Stable tag: 3.3.2
+=== External Image Importer ===
+Contributors: quietcactus
+Tags: images, media, import, external images, migration
+Requires at least: 6.0
+Tested up to: 7.1
+Requires PHP: 8.1
+Stable tag: 4.0.0
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Automatically detect external images in the post content and import images to your site then adding to the media library and replace image urls.
+Imports externally hosted images into your media library when you save a post, and rewrites the image URLs to point at your own site.
 
 == Description ==
 
-When you want to save a post, this plugin search for image urls which exists in post and automatically upload and import external images to the Wordpress upload directory and add images to the media library and then replace new image urls with old urls.
+Pasting content from another site leaves you hotlinking someone else's images:
+if they move, rename or block them, your posts break.
 
-= Features =
+External Image Importer fixes that automatically. Whenever a post is saved, it
+looks for `<img>` tags pointing at other domains, downloads those images into
+your uploads folder, adds them to the media library, and rewrites the URLs in
+the post to your own copy.
 
-* Automatically find images in posts and save them to the your server and wp media library
-* Update posts with new image urls in your server
-* Add images saved by plugin to the Wordpress media library
-* Select custom post types for excluding auto upload images
-* Choose exclude domain to save images from this domain address
-* Choose custom your base url for images
-* Choose custom images file name with patterns
-* Choose custom image alt name with patterns
-* Choose max width and height for images uploaded
+= What it does =
 
+* Finds external images in `src`, and in `srcset` and `<source>` where WordPress keeps that markup (see the FAQ)
+* Downloads them into the normal WordPress uploads folder and media library
+* Rewrites the post content to point at your copy
+* Optionally scales images down to a maximum width and height
+* Names files and alt attributes from placeholder patterns you control
+* Skips post types or domains you exclude
+* Can serve imported images from a different base URL, such as a CDN
 
-= Translators =
+= Built to be safe =
 
-* English
-* Persian (fa_IR) - [Ali Irani](https://irani.im)
-* Español (es) - [Diego Herrera](https://github.com/diegoh)
-* Russion (ru_RU) - [Артём Рябков](https://github.com/rad96)
-* German (de_DE) - [Till Zimmermann](https://github.com/tillz)
-* French (fr_FR) - [Malaiac](https://github.com/Malaiac)
-* Korean (ko_KR) - [Shodan](https://github.com/luvrei)
-* Italian (it_IT) - Patryk Chmura
+* Downloads go through the WordPress safe HTTP API, which refuses loopback, link-local and private network addresses, so a pasted URL cannot be used to probe your internal network
+* Every download is size-capped, and the type is detected from the file's own bytes rather than from its URL or the server's headers
+* Only real raster image types are stored: JPEG, PNG, GIF, WebP, AVIF, BMP and TIFF. SVG is rejected, because it can carry script
+* The settings screen is protected by a capability check and a nonce, and every value is validated before it is stored
+* The same remote image is only ever downloaded once, however many posts use it
 
+= Placeholders =
 
-= Links =
+Both the file name and the alt text accept these placeholders:
 
-* [Official Plugin Page](https://irani.im/wp-auto-upload-images.html)
-* [Github Repository](https://github.com/airani/wp-auto-upload)
-* [Report Issues](https://github.com/airani/wp-auto-upload/issues/new)
-* [Make a Donation](https://irani.im/wp-auto-upload-images.html#donate)
+`%filename%`, `%image_alt%`, `%url%`, `%today_date%`, `%year%`, `%month%`,
+`%today_day%`, `%post_date%`, `%post_year%`, `%post_month%`, `%post_day%`,
+`%random%`, `%timestamp%`, `%postname%`, `%post_id%`
+
+= For developers =
+
+Filters: `external_image_importer_should_process`,
+`external_image_importer_max_images_per_post`,
+`external_image_importer_max_bytes`,
+`external_image_importer_request_timeout`,
+`external_image_importer_allow_unsafe_urls`,
+`external_image_importer_reuse_attachments`,
+`external_image_importer_pattern_tokens`
+
+Actions: `external_image_importer_imported`,
+`external_image_importer_import_failed`
+
+Source code and issue tracker: https://github.com/quietcactus/wp-auto-upload
+
+= Credits =
+
+This plugin is a fork of Auto Upload Images by Ali Irani, released under the
+same GPL licence. See CREDITS.md in the source repository.
+
+== External services ==
+
+This plugin does not connect to any service of its own. It only downloads the
+image URLs that already appear in your own post content, from whatever host
+those URLs point at, at the moment you save the post. No data about your site
+or your visitors is sent anywhere.
 
 == Installation ==
 
-Upload the "Auto Upload Images" to plugin directory and Activate it.
-To change settings go to "Settings > Auto Upload Images" and change it.
+1. Upload the plugin folder to `/wp-content/plugins/`, or install it from the
+   Plugins screen in your dashboard.
+2. Activate the plugin.
+3. Go to **Settings → External Image Importer** to adjust the defaults.
+
+The default settings work without any configuration.
 
 == Frequently Asked Questions ==
 
-= Working with Gutenburg editor in wp 3.1 and later? =
-Yes, but after save with ajax not show urls immediately in editor.
+= Does it work with the block editor? =
 
+Yes. Images are imported when the post is saved. The editor may keep showing
+the original URL until you reload it, but the stored content is already
+rewritten.
 
-= What is "Base URL" in settings page? =
-This URL is used as the new URL image.
+= What is "Base URL"? =
 
-= What is "Image Name" in settings page? =
-You can change the final filename of the image uploaded.
+The address imported images are served from. Leave it as your site URL unless
+you serve uploads from a CDN or a separate media domain.
 
-= What is "Exclude Domains" in settings page? =
-You can exclude many domains from the upload.
+= Why was an image skipped? =
 
-== Screenshots ==
+Most often because it is bigger than the download limit, because it is not
+actually an image, because its domain is excluded, or because the remote server
+returned an error. Enable `WP_DEBUG` and check `wp-content/debug.log`, or hook
+`external_image_importer_import_failed`, to see the exact reason.
 
-1. Settings page in English language
-2. Settings page in Persian language
+= Can it import images from a server on my own network? =
+
+Not by default, and that is deliberate: allowing it would let anyone who can
+publish a post probe your internal network. If you genuinely need it, return
+true from the `external_image_importer_allow_unsafe_urls` filter.
+
+= Does it import images that are already in my media library? =
+
+No. Images already hosted on your own domain, on the configured base URL, or
+imported by a previous save are left alone.
+
+= Why was only the src imported and not the srcset images? =
+
+WordPress, not this plugin, is removing them. Core's `wp_kses` allow-list for
+post content permits `src` on an `img` but not `srcset`, and does not permit
+`<picture>` or `<source>` at all, so that markup is stripped from the content
+before any plugin sees it, for every author without the `unfiltered_html`
+capability. Administrators on a single site do have that capability, so
+srcset candidates written by an administrator are imported normally.
+
+= Why is %post_id% empty in a file name? =
+
+The post ID does not exist yet while a brand new post is being saved for the
+first time, so the placeholder resolves to nothing there. It fills in on every
+later save of that post. Use `%postname%`, `%timestamp%` or `%random%` if you
+need something unique on the first save.
+
+= Will it change existing posts? =
+
+Only when you save them. The plugin does not run a bulk pass over old content.
 
 == Changelog ==
 
-= 3.3.2 =
-* Add support for `webp` images
-* Add `%today_date%`, `%today_day%`, `%post_date%`, `%post_year%`, `%post_month%`, `%post_day%` patterns for image alt and filename
-* Fix bug in resolve `%date%` and `%day%` patterns and deprecated these patterns
+= 4.0.0 =
 
-= 3.3.1 =
-* Fix security vulnerability protecting settings form from xss and csrf
+First release of this fork, rebuilt on top of Auto Upload Images 3.3.2.
 
-= 3.3 =
-* Add support urls without schemes
-* Add support to showing www if exists in base url #58
-* Fix duplicate images in attachments bug reported #59
-* Fix bug to download images from some urls #71
-* Integrate with Gutenberg editor
-* Add Russian translation
+Security:
 
-= 3.2.2 =
-* Add support for detecting images from "srcset" attribute in img tag
+* Downloads now use the WordPress safe HTTP API, closing a server-side request forgery hole that allowed images to be fetched from loopback, link-local and private network addresses.
+* Added a configurable maximum download size, so a hostile or oversized remote file can no longer exhaust memory or disk.
+* The file type is now detected from the downloaded bytes. Files whose type cannot be established, and types outside a strict image allow-list (SVG included), are rejected instead of being written to the uploads folder without an extension.
+* The "reset settings" action was reachable without a nonce, allowing settings to be wiped by cross-site request forgery. Both form actions now check a nonce and the `manage_options` capability.
+* Filename and alt patterns are no longer interpreted as regular expressions, and imported URLs are no longer used as regular-expression replacements.
+* Saving the settings form no longer discards options that were not part of the submitted form.
 
-= 3.2.1 =
-* Fixed some important bugs
-* Add new feature to reset all options of plugin to defaults settings
-* Update with some enhancements in image resizing
+Fixes:
 
-= 3.2 =
-* Update with change image downloader
-* Update with save post enhancements
-* Update integrate with Gutenburg editor
-* Fixed mime_content_type error in some cases
-* Fixed some minor bugs
-* Delete deprecated wp functions
-* Add Korean translation
-* Add French translation
+* Unchecking every "exclude post type" box now clears the list instead of keeping the old value, and duplicate entries no longer accumulate.
+* `0` and empty values can now be saved for the size fields.
+* Resizing no longer creates a second, duplicate attachment and no longer leaves the full-size file orphaned.
+* Alt attributes are rewritten only on the image they belong to, instead of everywhere in the post.
+* Fixed PHP 8 warnings and deprecations when a post has no ID, no name or no date.
+* Fixed URL detection for `srcset`, `<source>` elements, single-quoted and unquoted attributes, and URLs containing HTML entities.
+* Attachments are no longer created for the same remote image twice.
+* Images are stored in the uploads folder matching the post's own date.
 
-= 3.1.1 =
-* Fixed critical bug with update to new file structure
+Housekeeping:
 
-= 3.1 =
-* Fixed bug and add support for base url with HTTPS
-* Fixed bug in image alt attribute replacement
-* Some optimizations and improvements code
-* Enhancement in files security access
-* Update files structures
-* Update setting page styles
-* Update screenshot pictures
-* Add Information box to setting page
+* Requires PHP 8.1 and WordPress 6.0.
+* Rewritten as namespaced, autoloaded classes with a unique prefix.
+* Added an uninstall routine, a unit test suite, a WordPress integration test suite, PHP_CodeSniffer configuration and GitHub Actions CI.
 
-= 3.0.1 =
-* Fixed some bugs
+== Upgrade Notice ==
 
-= 3.0 =
-* Add option for customize images alt attribute with defined patterns
-* Add option for exclude post types from auto images uploading
-* Add `%timestamp%`, `%post_id%`, `%postname%`, `%image_alt%` patterns for custom file names and image alt names.
-* Handling image alt attribute
-* Change code structures and many important optimizations
-* Saving images on upload directory with same post date
-* Fixed bugs with uploading images from create new posts by wp restful api
-* Fixed some bugs. Thanks to [Sergey Funn](https://github.com/racypepper)
-
-= 2.2 =
-* Added `%random%` pattern for file names. Contributed by [Zdravko Danev](https://github.com/zdanev)
-* Added Italian translation. Thanks to Patryk Chmura
-
-= 2.1 =
-* Fixed bug in problem with some urls
-
-= 2.0 =
-* Added option for choosing max width and height of saved images
-* Added new shortcodes for custom filenames. `%year%`, `%month%` and `%day%`
-* Added error message for "PHP CURL" disabled sites
-* Fixed bug in saving Persian and Arabic filename
-* Fixed bug in saving image process
-* Fixed bug in getting images url
-* Many optimizations in code and enhancements performance
-
-= 1.6 =
-* [Fixed] Fixed a bug in replace exclude urls
-* [Updated] Some optimize in code
-* [Added] Added Español translation. Thanks to [Diegoh](https://github.com/diegoh)
-* [Added] Added Russion translation. Thanks to [Артём](https://github.com/rad96)
-* [Added] Added German translation. Thanks to [Till](https://github.com/tillz)
-
-= 1.5 =
-* [Updated] Optimize save post
-* [Added] Add language files (English, Persian)
-* [Added] Add option to choose exclude urls
-* [Added] Add option for choosing a custom filename
-* [Added] Add option for choosing a custom base url
-* [Added] Add settings page
-* [Fixed] Fixed for adding image correctly to the media library
-
-= 1.4.1 =
-* [Fixed] Fixed tiny bug ;) Thanks to Ali for reporting bug
-
-= 1.4 =
-* [New Feature] Work With Multi Address Sites
-* [Fixed] Work with Persian & Arabic URLs
-* [Fixed] Replace URL for images already been uploaded
-* Implementation with object-oriented
-
-= 1.3 =
-* Fixed some bugs
-
-= 1.2 =
-* Fixed Bug: Save one revision post
-* Fixed Bug: Fix pattern of urls
-* Fixed Bug: Save file with same name
-* Fixed Bug: More images with same urls in post
-* Fixed Bug: Work with ssl urls
-
-= 1.1 =
-* Add image to Media Library and attach to post
-* Fix a bug
-
-= 1.0 =
-* It's first version.
+= 4.0.0 =
+Security release and rewrite. Requires PHP 8.1. Settings are carried over from Auto Upload Images automatically.
