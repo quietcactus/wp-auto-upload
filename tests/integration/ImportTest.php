@@ -73,9 +73,12 @@ final class ImportTest extends WP_UnitTestCase
         ];
     }
 
-    private function createPost(string $content): \WP_Post
+    /**
+     * @param array<string, mixed> $args Extra post arguments.
+     */
+    private function createPost(string $content, array $args = []): \WP_Post
     {
-        $postId = self::factory()->post->create(['post_content' => $content]);
+        $postId = self::factory()->post->create($args + ['post_content' => $content]);
 
         $post = get_post($postId);
 
@@ -182,22 +185,55 @@ final class ImportTest extends WP_UnitTestCase
         $this->assertStringContainsString('https://cdn.example.net/wp-content/uploads/', $post->post_content);
     }
 
-    public function testFilenamePatternIsApplied(): void
+    /**
+     * The slug is computed into $data rather than $postarr, so resolving
+     * %postname% has to read the filtered data, not just the submitted array.
+     */
+    public function testPostnamePatternResolvesOnTheFirstSave(): void
+    {
+        Settings::update(['image_name' => '%postname%-%filename%']);
+
+        $post = $this->createPost(
+            '<img src="https://remote.test/photo.png" alt="named">',
+            ['post_title' => 'First Save']
+        );
+
+        $this->assertStringContainsString('/first-save-photo.png', $post->post_content);
+    }
+
+    /**
+     * %post_id% can only resolve once the post exists, which means on update.
+     */
+    public function testPostIdPatternResolvesOnUpdate(): void
     {
         Settings::update(['image_name' => '%post_id%-%filename%']);
 
-        $post = $this->createPost('<img src="https://remote.test/photo.png" alt="named">');
+        $postId = self::factory()->post->create([
+            'post_title'   => 'Second Save',
+            'post_content' => 'no images yet',
+        ]);
 
-        $this->assertMatchesRegularExpression('#/\d+-photo\.png#', $post->post_content);
+        wp_update_post([
+            'ID'           => $postId,
+            'post_content' => '<img src="https://remote.test/photo.png" alt="named">',
+        ]);
+
+        $post = get_post($postId);
+
+        $this->assertInstanceOf(\WP_Post::class, $post);
+        $this->assertStringContainsString('/' . $postId . '-photo.png', $post->post_content);
     }
 
     public function testAltPatternIsWrittenBackIntoTheContent(): void
     {
         Settings::update(['alt_name' => 'Photo of %postname%']);
 
-        $post = $this->createPost('<img src="https://remote.test/photo.png" alt="old alt">');
+        $post = $this->createPost(
+            '<img src="https://remote.test/photo.png" alt="old alt">',
+            ['post_title' => 'Alt Pattern']
+        );
 
-        $this->assertStringContainsString('alt="Photo of ', $post->post_content);
+        $this->assertStringContainsString('alt="Photo of alt-pattern"', $post->post_content);
         $this->assertStringNotContainsString('old alt', $post->post_content);
     }
 

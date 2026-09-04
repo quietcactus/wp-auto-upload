@@ -84,7 +84,8 @@ composer run test:unit     # fast, no WordPress needed
 ```
 
 The integration suite needs the WordPress test library and a MySQL/MariaDB
-database:
+database. The library is checked out with Subversion, so install that first if
+you do not have it (`brew install svn`, `apt install subversion`):
 
 ```bash
 bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 latest

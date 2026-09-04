@@ -85,7 +85,7 @@ final class PatternResolver
             '%url%'        => (string) Url::host(home_url()),
             '%random%'     => uniqid('img_', false),
             '%timestamp%'  => (string) time(),
-            '%post_id%'    => (string) ($this->post['ID'] ?? ''),
+            '%post_id%'    => empty($this->post['ID']) ? '' : (string) $this->post['ID'],
             '%postname%'   => (string) ($this->post['post_name'] ?? ''),
         ];
 

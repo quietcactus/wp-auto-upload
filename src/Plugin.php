@@ -74,13 +74,41 @@ final class Plugin
         }
 
         $content = (string) wp_unslash((string) $data['post_content']);
-        $updated = $this->importImages($content, $postarr);
+        $updated = $this->importImages($content, $this->patternContext($data, $postarr));
 
         if ($updated !== null && $updated !== $content) {
             $data['post_content'] = wp_slash($updated);
         }
 
         return $data;
+    }
+
+    /**
+     * Build the post data that %placeholder% patterns are resolved against.
+     *
+     * WordPress computes post_name and post_date into $data, while the post ID
+     * only exists in $postarr, and only when an existing post is being updated.
+     * Reading either one alone leaves %postname% or %post_id% resolving to an
+     * empty string.
+     *
+     * @param array<string, mixed> $data    Post data.
+     * @param array<string, mixed> $postarr Submitted post data.
+     *
+     * @return array<string, mixed>
+     */
+    private function patternContext(array $data, array $postarr): array
+    {
+        $context = $data;
+
+        $context['ID'] = (int) ($postarr['ID'] ?? 0);
+
+        foreach (['post_name', 'post_date', 'post_date_gmt'] as $field) {
+            if (empty($context[$field]) && !empty($postarr[$field])) {
+                $context[$field] = $postarr[$field];
+            }
+        }
+
+        return $context;
     }
 
     /**

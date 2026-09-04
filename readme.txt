@@ -113,6 +113,13 @@ true from the `external_image_importer_allow_unsafe_urls` filter.
 No. Images already hosted on your own domain, on the configured base URL, or
 imported by a previous save are left alone.
 
+= Why is %post_id% empty in a file name? =
+
+The post ID does not exist yet while a brand new post is being saved for the
+first time, so the placeholder resolves to nothing there. It fills in on every
+later save of that post. Use `%postname%`, `%timestamp%` or `%random%` if you
+need something unique on the first save.
+
 = Will it change existing posts? =
 
 Only when you save them. The plugin does not run a bulk pass over old content.

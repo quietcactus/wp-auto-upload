@@ -78,6 +78,17 @@ final class PatternResolverTest extends TestCase
         $this->assertSame(gmdate('Y'), $resolver->resolve('%post_year%'));
     }
 
+    /**
+     * A brand new post has no ID yet, so %post_id% must resolve to nothing
+     * rather than to a literal "0".
+     */
+    public function testPostIdResolvesToNothingBeforeThePostExists(): void
+    {
+        $this->assertSame('', (new PatternResolver(['ID' => 0], null, null))->resolve('%post_id%'));
+        $this->assertSame('', (new PatternResolver([], null, null))->resolve('%post_id%'));
+        $this->assertSame('-photo', (new PatternResolver(['ID' => 0], null, 'photo'))->resolve('%post_id%-%filename%'));
+    }
+
     public function testNullPatternResolvesToEmptyString(): void
     {
         $this->assertSame('', $this->resolver()->resolve(null));
